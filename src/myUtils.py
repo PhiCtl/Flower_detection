@@ -4,7 +4,7 @@ import numpy as np
 import torchvision.transforms as T
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
 import torch.functional as F
-from google.colab.patches import cv2_imshow
+#from google.colab.patches import cv2_imshow
 
 MEAN_Imagenet = [0.485, 0.456, 0.406]
 STD_Imagenet = [0.229, 0.224, 0.225]
@@ -35,9 +35,13 @@ def label_reader(json_file):
 def draw_bboxes(image, bboxes):
     img = image.copy()
     for [xm,ym,xM,yM] in bboxes:
-      img = cv2.rectangle(img, (xm,ym), (xM,yM) ,(255,0,0),2)
-    #cv2.imshow("Image with bounding box", img) 
-    cv2_imshow(img)
+        img = cv2.rectangle(img, (xm,ym), (xM,yM), (255,0,0), 2)
+    rescale = (int(img.shape[1]/4), int(img.shape[0]/4))
+    img = cv2.resize(img, rescale)
+    cv2.imshow("Image with bounding box", img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    #cv2_imshow(img)
 
 def get_img_transformed(train, min_size=2448, max_size=2448): #TODO modify min and max sizes
   """
@@ -57,14 +61,14 @@ def get_img_transformed(train, min_size=2448, max_size=2448): #TODO modify min a
                                      image_std=STD_Imagenet))
   if train:
       # during training, randomly flip the training images
-      # and ground-truth for data augmentation
+      # and ground-truth for data_train augmentation
       transforms.append(T.ColorJitter(brightness = 0.7, hue=0.2))
       transforms.append(T.RandomErasing())
       
   return T.Compose(transforms)
 
 
-  def collate_double(batch):
+def collate_double(batch):
     """
     collate function for the ObjectDetectionDataSet.
     Only used by the dataloader.
@@ -84,8 +88,15 @@ def draw_corners(image, corners):
       img = cv2.circle(img, (c,d), radius=1, color=(255, 255, 255), thickness=2)
       img = cv2.circle(img, (e,f), radius=1, color=(255, 255, 255), thickness=2)
       img = cv2.circle(img, (g,h), radius=1, color=(255, 255, 255), thickness=2)
-  cv2_imshow(img)
+  #cv2_imshow(img)
+  cv2.imshow("Image rotated with corners",img)
 
 def bboxes_area(bboxes):
-  area = np.abs(np.dot(bboxes[:,0] - bboxes[:,2], bboxes[:,1] - bboxes[:,3]))
-  return area 
+    """
+    Compute bounding boxes area
+    :param bboxes: (numpy array of dimensions (nb_boxes, 4)
+    :return area: (numpy array of dimensions (nb_boxes,)
+
+    """
+    area = np.abs((bboxes[:,0] - bboxes[:,2]) * (bboxes[:,1] - bboxes[:,3]))
+    return area

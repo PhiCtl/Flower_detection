@@ -111,21 +111,19 @@ def rotate(image, bboxes, angle):
     prev_area = bboxes_area(new_bbox)
 
     # Rescale everybody
-    dw = np.int((image.shape[1] - w)/2)
-    dh = np.int((image.shape[0] - h)/2)
-    img_cropped = img[dh:dh+h,dw:dw+w,:] # crop image to initial scale (h,w,3)
+    scale_x = img.shape[1]/w
+    scale_y = img.shape[0]/h
+    img = cv2.resize(img, (w,h))
 
-    # clip bounding box
-    xmin=np.minimum(np.maximum(new_bbox[:,0],dw), dw+w).reshape(-1,1) - dw
-    ymin=np.minimum(np.maximum(new_bbox[:,1],dh), dh+h).reshape(-1,1) - dh
-    xmax=np.minimum(np.maximum(new_bbox[:,2],dw), dw+w).reshape(-1,1) - dw
-    ymax=np.minimum(np.maximum(new_bbox[:,3],dh), dh+h).reshape(-1,1).reshape(-1,1) - dh
-    new_bbox = np.hstack((xmin, ymin, xmax, ymax))
+    # scale and clip bounding box
+    new_bbox = np.divide(new_bbox, np.array([scale_x, scale_y, scale_x, scale_y])).astype(int)# rescale
+    new_bbox[:,0]=np.maximum(new_bbox[:,0],0)
+    new_bbox[:,1]=np.maximum(new_bbox[:,1],0)
+    new_bbox[:,2]=np.minimum(new_bbox[:,2],w)
+    new_bbox[:,3]=np.minimum(new_bbox[:,3],h)
     new_area = bboxes_area(new_bbox)
     
     # delete bboxes for elements out of scope if area is less than 0.25 of previous area
-    ind = np.argwhere(new_area/prev_area >= 0.25)
-    print(ind)
-    new_bbox = new_bbox[ind,:]
-
-    return img_cropped, new_bbox
+    #ind = np.argwhere(new_area/prev_area >= 0.25)
+    #new_bbox = new_bbox[ind[1],:]
+    return img, new_bbox
