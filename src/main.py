@@ -1,6 +1,6 @@
-from src.myClasses import*
+from myClasses import*
 
 myTransforms = RandomRotate(90)
-dataset = FlowerDetectionDataset('data_train/', '../labels/export1.json', custom_transforms=myTransforms)
+dataset = FlowerDetectionDataset(root_img='data_train/', json_file_root='labels/export1.json', custom_transforms=myTransforms)
 
 dic = dataset[0]
