@@ -20,12 +20,14 @@ def label_reader(json_file):
   
   for _, d in data.iterrows():
     name = d['External ID']
-    labels = d['Label']['objects']
+
     pix = []
-    
-    for l in labels:
-      b = l['bbox']
-      pix.append([b['left'],b['top'], b['left']+b['width'], b['top']+b['height']])
+    for l in d['Label']['objects']:
+        if not 'bbox' in l:
+            continue
+        else :
+            b = l['bbox']
+            pix.append([b['left'],b['top'], b['left']+b['width'], b['top']+b['height']])
     
     bboxes[name] = np.array(pix) # of size (N,4), with opencv image convention
   
