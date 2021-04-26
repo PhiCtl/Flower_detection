@@ -78,21 +78,23 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
 
             bboxes = np.array(self.labels[self.imgs[idx]])  # retrieve in dictionnary associated np.array
 
-        # there is only one class (either background either flower)
-        labels = torch.ones((len(bboxes),), dtype=torch.int64)
-
-
-        # Apply transforms #TODO all in once
+        # Apply transforms #TODO all in once, clean up ugly code
         target = {}
         if self.custom_transforms is not None:  # include bboxes transforms
             img, target = self.custom_transforms(img, {'boxes': bboxes, 'masks': masks})  # img still in cv2 convention
             if self.masks is not None: target["masks"] = torch.as_tensor(target['masks'], dtype=torch.uint8)
+            bboxes = target['boxes']
         if self.transforms is not None:  # img transforms only
             img = self.transforms(img)  # img toTensor
 
+        # there is only one class (either background either flower)
+        labels = torch.ones((len(bboxes),), dtype=torch.int64)
+        area = (bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3]).abs()
+        iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
+
         # Prepare sample
         target = {"boxes": torch.as_tensor(target['boxes'], dtype=torch.float32),\
-                  "masks": target['masks'], "image_id": torch.tensor([idx]), "labels": labels}
+                  "masks": target['masks'], "image_id": torch.tensor([idx]), "labels": labels, 'iscrowd': iscrowd, 'area': area}
 
 
         return {'x': img, 'y': target, 'x_name': self.imgs[idx], 'y_name': self.imgs[idx]}
