@@ -89,7 +89,7 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
 
         # there is only one class (either background either flower)
         labels = torch.ones((len(bboxes),), dtype=torch.int64)
-        area = (bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3]).abs()
+        area = np.abs(bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3])
         iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
 
         # Prepare sample
