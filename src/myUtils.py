@@ -23,9 +23,7 @@ def label_reader(json_file):
 
     pix = []
     for l in d['Label']['objects']:
-        if not 'bbox' in l:
-            continue
-        else :
+        if 'bbox' in l:
             b = l['bbox']
             pix.append([b['left'],b['top'], b['left']+b['width'], b['top']+b['height']])
     
