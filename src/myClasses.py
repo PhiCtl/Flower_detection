@@ -55,11 +55,12 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
 
         # there is only one class (either background either flower)
         labels = torch.ones((len(bboxes),), dtype=torch.int64)
+        bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
         area = torch.abs(bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3])
         iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
 
         # Prepare sample
-        target = {"boxes": torch.as_tensor(bboxes, dtype=torch.float32),\
+        target = {"boxes": bboxes,\
                   "image_id": torch.tensor([idx]), "labels": labels, 'iscrowd': iscrowd, 'area': area}
 
         if self.transforms is not None:  # img transforms only
