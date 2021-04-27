@@ -132,4 +132,4 @@ def IoU(bbox_1, bbox_2):
     
     return overlap_area / tot_area
    
-   return 0
+  return 0
