@@ -29,7 +29,8 @@ def label_reader(json_file, type='flower'):
                 b = l['bbox']
                 pix.append([b['left'],b['top'], b['left']+b['width'], b['top']+b['height']])
     
-    bboxes[name] = np.array(pix) # of size (N,4), with opencv image convention
+    if pix:
+        bboxes[name] = np.array(pix) # of size (N,4), with opencv image convention
   
   return bboxes
 
