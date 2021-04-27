@@ -133,3 +133,30 @@ def IoU(bbox_1, bbox_2):
     return overlap_area / tot_area
    
   return 0
+
+def write(dataset, prediction=None, gt=True):
+  os.chdir('/content/drive/MyDrive/GBH/results')
+
+  if gt:
+    os.chdir('groundtruths')
+    # <class_name> <left> <top> <right> <bottom>
+    for (_, target), i in zip(dataset, range(len(dataset))):
+      name = dataset.imgs[i]
+      file_name = name + '.txt'
+      f = open(file_name,'w+') # open file in w mode
+      for label, bbox in zip(target['labels'], target['boxes']):
+        f.write("{} {} {} {} {}\r\n".format(label, bbox[0], bbox[1], bbox[2], bbox[3]))
+      f.close()
+
+  if prediction is not None :
+    os.chdir('detections')
+    # <class_name> <confidence> <left> <top> <right> <bottom>
+    for pred, (_, target), i in zip(prediction, dataset, range(len(dataset))):
+      name = dataset.imgs[i]
+      file_name = name + '.txt'
+      f = open(file_name, 'w+') 
+      for label, score, bbox in zip(pred['labels'], pred['scores'], pred['boxes']):
+        f.write("{} {} {} {} {} {}\r\n".format(label, score, bbox[0], bbox[1], bbox[2], bbox[3]))
+      f.close()
+
+  os.chdir('/content')
