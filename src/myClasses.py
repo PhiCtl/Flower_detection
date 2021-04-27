@@ -72,7 +72,7 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
 
         # Prepare sample
         target = {"boxes": bboxes, "image_id": torch.tensor([idx]),\
-                  "labels": labels, 'iscrowd': iscrowd, 'area': area, "name" : self.imgs[idx]}
+                  "labels": labels, 'iscrowd': iscrowd, 'area': area}
 
         if self.transforms is not None:  # img transforms only
             img = self.transforms(img)  # img toTensor
