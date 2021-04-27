@@ -2,6 +2,7 @@ import pandas as pd
 import cv2
 import numpy as np
 import torchvision.transforms as T
+import os
 from torchvision.models.detection.transform import GeneralizedRCNNTransform
 import torch.functional as F
 #from google.colab.patches import cv2_imshow
@@ -10,7 +11,7 @@ MEAN_Imagenet = [0.485, 0.456, 0.406]
 STD_Imagenet = [0.229, 0.224, 0.225]
 
 
-def label_reader(json_file):
+def label_reader(json_file, type='flower'):
   """ Read a label file for an image in JSON format:
   Args: valid file path name
   Return: dictionnary of np.array dim:(Nx4) of bounding boxes coordinates [xmin, ymin, xmax, ymax]
@@ -23,9 +24,10 @@ def label_reader(json_file):
 
     pix = []
     for l in d['Label']['objects']:
-        if 'bbox' in l:
-            b = l['bbox']
-            pix.append([b['left'],b['top'], b['left']+b['width'], b['top']+b['height']])
+        if l['value'] == type:
+            if 'bbox' in l:
+                b = l['bbox']
+                pix.append([b['left'],b['top'], b['left']+b['width'], b['top']+b['height']])
     
     bboxes[name] = np.array(pix) # of size (N,4), with opencv image convention
   
