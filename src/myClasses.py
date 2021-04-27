@@ -93,7 +93,7 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
 
         # Prepare sample
-        target = {"boxes": torch.as_tensor(target['boxes'], dtype=torch.float32),\
+        target = {"boxes": torch.as_tensor(bboxes, dtype=torch.float32),\
                   "masks": target['masks'], "image_id": torch.tensor([idx]), "labels": labels, 'iscrowd': iscrowd, 'area': area}
 
 
