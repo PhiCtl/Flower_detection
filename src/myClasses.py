@@ -33,7 +33,10 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         # load all image files, sorting them to
         # ensure that they are aligned
         self.imgs = list(sorted(os.listdir(root_img)))  # OK
-        self.labels = label_reader(json_file_root)
+        self.flower_labels = label_reader(json_file_root)
+        self.hidden_labels = label_reader(json_file_root, type='hidden')
+        self.core_labels = label_reader(json_file_root, type='core')
+
 
     def __len__(self):
         return len(self.imgs)
@@ -44,7 +47,14 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         img_path = os.path.join(self.root_img, self.imgs[idx])
         img = cv2.imread(img_path)  # read in [H,W,3] BGR format
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # turn to RGB [H,W,3]
-        bboxes = np.array(self.labels[self.imgs[idx]])  # retrieve in dictionnary associated np.array
+
+        # load bounding boxes
+        bboxes = []
+        bboxes.append(self.flower_labels[self.imgs[idx]]) # reachable flowers detection
+        bboxes.append(self.hidden_labels[self.imgs[idx]]) # hidden flowers detection
+        nb_flowers=len(bboxes)
+        bboxes.append(self.core_labels[self.imgs[idx]]) # flower visible cores detection
+        bboxes = np.array(bboxes)
 
         # Apply transforms #TODO all in once, clean up ugly code
         target = {}
@@ -55,13 +65,14 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
 
         # there is only one class (either background either flower)
         labels = torch.ones((len(bboxes),), dtype=torch.int64)
+        labels[nb_flowers:] *= 2 # assign class 2 to flower cores
         bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
         area = torch.abs(bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3])
         iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
 
         # Prepare sample
         target = {"boxes": bboxes,\
-                  "image_id": torch.tensor([idx]), "labels": labels, 'iscrowd': iscrowd, 'area': area}
+                  "image_id": torch.tensor([idx]), "flower_labels": labels, 'iscrowd': iscrowd, 'area': area}
 
         if self.transforms is not None:  # img transforms only
             img = self.transforms(img)  # img toTensor
@@ -140,7 +151,7 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
 
         # Prepare sample
         target = {"boxes": torch.as_tensor(bboxes, dtype=torch.float32),\
-                  "masks": target['masks'], "image_id": torch.tensor([idx]), "labels": labels, 'iscrowd': iscrowd, 'area': area}
+                  "masks": target['masks'], "image_id": torch.tensor([idx]), "flower_labels": labels, 'iscrowd': iscrowd, 'area': area}
 
 
         return {'x': img, 'y': target, 'x_name': self.imgs[idx], 'y_name': self.imgs[idx]}
