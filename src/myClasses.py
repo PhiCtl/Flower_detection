@@ -71,8 +71,8 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
 
         # Prepare sample
-        target = {"boxes": bboxes,\
-                  "image_id": torch.tensor([idx]), "labels": labels, 'iscrowd': iscrowd, 'area': area}
+        target = {"boxes": bboxes, "image_id": torch.tensor([idx]),\
+                  "labels": labels, 'iscrowd': iscrowd, 'area': area, "name" : self.imgs[idx]}
 
         if self.transforms is not None:  # img transforms only
             img = self.transforms(img)  # img toTensor
