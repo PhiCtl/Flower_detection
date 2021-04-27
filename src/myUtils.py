@@ -91,3 +91,45 @@ def bbox_area(bbox):
     """
     area = (bbox[2] - bbox[0] + 1) * (bbox[3] - bbox[1] + 1)
     return area
+
+def intersect(bbox_1, bbox_2):
+  """
+  Args:
+    - bbox_1, bbox_2 : torch.Tensors of dim (4) (top left and bottom right corners of bounding box)
+  Returns:
+    - (bool) : if both boxes intersect
+  """
+
+  if bbox_1[1] > bbox_2[3]: # bbox 1 below bbox 2
+    return False
+  if bbox_1[3] < bbox_2[1]: # bbox 1 above bbox2
+    return False
+  if bbox_1[2] < bbox_2[0]: # bbox 1 left of bbox2
+    return False
+  if bbox_1[0] > bbox_2[2]: # bbox 1 right of bbox2
+    return False
+  return True
+
+
+def IoU(bbox_1, bbox_2):
+  
+  """
+  Args:
+    - bbox_1, bbox_2 : torch.Tensors of dim (4) (top left and bottom right corners of bounding box)
+  Returns:
+    - (float) Intersection over Union (IoU)
+  """
+
+  if intersect(bbox_1, bbox_2):
+
+    xm = max(bbox_1[0], bbox_2[0])
+    ym = max(bbox_1[1], bbox_2[1])
+    xM = min(bbox_1[2], bbox_2[2])
+    yM = min(bbox_1[3], bbox_2[3])
+    overlap_area = (xM - xm + 1) * (yM - ym + 1)
+    
+    tot_area = bboxes_area(bbox_1) + bboxes_area(bbox_2) - overlap_area
+    
+    return overlap_area / tot_area
+   
+   return 0
