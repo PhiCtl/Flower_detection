@@ -82,12 +82,12 @@ def draw_corners(image, corners):
   #cv2_imshow(img)
   cv2.imshow("Image rotated with corners",img)
 
-def bboxes_area(bboxes):
+def bbox_area(bbox):
     """
     Compute bounding boxes area
     :param bboxes: (numpy array of dimensions (nb_boxes, 4)
     :return area: (numpy array of dimensions (nb_boxes,)
 
     """
-    area = np.abs((bboxes[:,0] - bboxes[:,2]) * (bboxes[:,1] - bboxes[:,3]))
+    area = (bbox[2] - bbox[0] + 1) * (bbox[3] - bbox[1] + 1)
     return area
