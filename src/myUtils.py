@@ -55,10 +55,7 @@ def get_img_transformed(train, min_size=2448, max_size=2448): #TODO modify min a
   # converts the image into a PyTorch Tensor
   transforms.append(T.ToTensor())
   # image scaling and normalization
-  transforms.append(GeneralizedRCNNTransform(min_size=min_size,
-                                     max_size=max_size,
-                                     image_mean=MEAN_Imagenet,
-                                     image_std=STD_Imagenet))
+  transforms.append(T.Normalize(mean=MEAN_Imagenet, std=STD_Imagenet))
   if train:
       # during training, randomly flip the training images
       # and ground-truth for data_train augmentation
