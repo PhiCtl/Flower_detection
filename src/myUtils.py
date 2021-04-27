@@ -128,7 +128,7 @@ def IoU(bbox_1, bbox_2):
     yM = min(bbox_1[3], bbox_2[3])
     overlap_area = (xM - xm + 1) * (yM - ym + 1)
     
-    tot_area = bboxes_area(bbox_1) + bboxes_area(bbox_2) - overlap_area
+    tot_area = bbox_area(bbox_1) + bbox_area(bbox_2) - overlap_area
     
     return overlap_area / tot_area
    
