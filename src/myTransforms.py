@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from myUtils import draw_corners, bboxes_area
 
 
 # from https://blog.paperspace.com/data-augmentation-for-object-detection-rotation-and-shearing/
