@@ -127,10 +127,10 @@ def rotate(image, target, angle):
     new_bbox[:, 2] = np.minimum(new_bbox[:, 2], w)
     new_bbox[:, 3] = np.minimum(new_bbox[:, 3], h)
 
-    new_target = {'boxes': new_bbox, 'masks': None}
+    new_target = {'boxes': new_bbox}
 
     # Rotate and resize masks, if any
-    if target['masks'] is not None:
+    if 'masks' in target:
         masks = target['masks'].copy()
         for mask in masks:
             mask = cv2.warpAffine(mask, M, (nW, nH))

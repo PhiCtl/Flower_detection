@@ -23,8 +23,53 @@ class RandomRotate(object):
         #draw_bboxes(img, targ['boxes'])
         return img, targ
 
-
 class FlowerDetectionDataset(torch.utils.data.Dataset):
+
+    def __init__(self, root_img, json_file_root=None, transforms=None, custom_transforms=None):
+        self.root_img = root_img
+        self.transforms = transforms
+        self.custom_transforms = custom_transforms
+
+        # load all image files, sorting them to
+        # ensure that they are aligned
+        self.imgs = list(sorted(os.listdir(root_img)))  # OK
+        self.labels = label_reader(json_file_root)
+
+    def __len__(self):
+        return len(self.imgs)
+
+    def __getitem__(self, idx: int):
+
+        # load images
+        img_path = os.path.join(self.root_img, self.imgs[idx])
+        img = cv2.imread(img_path)  # read in [H,W,3] BGR format
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # turn to RGB [H,W,3]
+        bboxes = np.array(self.labels[self.imgs[idx]])  # retrieve in dictionnary associated np.array
+
+        # Apply transforms #TODO all in once, clean up ugly code
+        target = {}
+        # Still img: np.array and bboxes:np.array
+        if self.custom_transforms is not None:  # include bboxes transforms
+            img, res = self.custom_transforms(img, {'boxes': bboxes})  # img still in cv2 convention
+            bboxes = res['boxes']
+
+        # there is only one class (either background either flower)
+        labels = torch.ones((len(bboxes),), dtype=torch.int64)
+        area = np.abs(bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3])
+        iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
+
+        # Prepare sample
+        target = {"boxes": torch.as_tensor(bboxes, dtype=torch.float32),\
+                  "image_id": torch.tensor([idx]), "labels": labels, 'iscrowd': iscrowd, 'area': area}
+
+        if self.transforms is not None:  # img transforms only
+            img = self.transforms(img)  # img toTensor
+
+        return {'image': img, 'target': target}
+
+
+
+class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
 
     def __init__(self, root_img, json_file_root=None, root_masks=None, transforms=None, custom_transforms=None):
         self.root_img = root_img
@@ -81,9 +126,9 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         # Apply transforms #TODO all in once, clean up ugly code
         target = {}
         if self.custom_transforms is not None:  # include bboxes transforms
-            img, target = self.custom_transforms(img, {'boxes': bboxes, 'masks': masks})  # img still in cv2 convention
-            if self.masks is not None: target["masks"] = torch.as_tensor(target['masks'], dtype=torch.uint8)
-            bboxes = target['boxes']
+            img, res = self.custom_transforms(img, {'boxes': bboxes, 'masks': masks})  # img still in cv2 convention
+            if self.masks is not None: target["masks"] = torch.as_tensor(res['masks'], dtype=torch.uint8)
+            bboxes = res['boxes']
         if self.transforms is not None:  # img transforms only
             img = self.transforms(img)  # img toTensor
 

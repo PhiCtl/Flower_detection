@@ -43,11 +43,10 @@ def draw_bboxes(image, bboxes):
     cv2.destroyAllWindows()
     #cv2_imshow(img)
 
-def get_img_transformed(train, min_size=2448, max_size=2448): #TODO modify min and max sizes
+def get_img_transformed(): #TODO modify min and max sizes
   """
   Apply mandatory transforms on the image
-  Parameters:
-            - train (bool): True if training, False if evaluating
+
   Returns:
             - Composition of transforms
   """
@@ -56,12 +55,6 @@ def get_img_transformed(train, min_size=2448, max_size=2448): #TODO modify min a
   transforms.append(T.ToTensor())
   # image scaling and normalization
   transforms.append(T.Normalize(mean=MEAN_Imagenet, std=STD_Imagenet))
-  if train:
-      # during training, randomly flip the training images
-      # and ground-truth for data_train augmentation
-      transforms.append(T.ColorJitter(brightness = 0.7, hue=0.2))
-      transforms.append(T.RandomErasing())
-      
   return T.Compose(transforms)
 
 
@@ -71,11 +64,9 @@ def collate_double(batch):
     Only used by the dataloader.
     from : https://johschmidt42.medium.com/train-your-own-object-detector-with-faster-rcnn-pytorch-8d3c759cfc70
     """
-    x = [sample['x'] for sample in batch]
-    y = [sample['y'] for sample in batch] #list of tensors
-    x_name = [sample['x_name'] for sample in batch]
-    y_name = [sample['y_name'] for sample in batch]
-    return x, y, x_name, y_name
+    x = [sample['image'] for sample in batch]
+    y = [sample['target'] for sample in batch] #list of tensors
+    return x, y
 
 
 def draw_corners(image, corners):
