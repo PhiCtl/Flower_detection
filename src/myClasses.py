@@ -66,7 +66,7 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         if self.transforms is not None:  # img transforms only
             img = self.transforms(img)  # img toTensor
 
-        return {'image': img, 'target': target}
+        return img, target
 
 
 
