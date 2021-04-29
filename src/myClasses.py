@@ -51,13 +51,12 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         # load bounding boxes
         bboxes = np.array(self.flower_labels[self.imgs[idx]])
         nb_flowers = len(bboxes)
-        if self.imgs[idx] in self.hidden_labels:
-            bboxes = np.vstack((bboxes, np.array(self.hidden_labels[self.imgs[idx]])))
+        #if self.imgs[idx] in self.hidden_labels:
+         #   bboxes = np.vstack((bboxes, np.array(self.hidden_labels[self.imgs[idx]])))
         #if self.imgs[idx] in self.core_labels:
             #bboxes = np.vstack((bboxes, np.array(self.core_labels[self.imgs[idx]])))
 
         # Apply transforms #TODO all in once, clean up ugly code
-        target = {}
         # Still img: np.array and bboxes:np.array
         if self.custom_transforms is not None:  # include bboxes transforms
             img, res = self.custom_transforms(img, {'boxes': bboxes})  # img still in cv2 convention
@@ -83,9 +82,8 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
 
 class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
 
-    def __init__(self, root_img, json_file_root=None, root_masks=None, transforms=None, custom_transforms=None):
+    def __init__(self, root_img, root_masks=None, transforms=None, custom_transforms=None):
         self.root_img = root_img
-        assert (json_file_root is not None or root_masks is not None), "Masks or bounding boxes file should be provided"
 
         self.root_masks = root_masks
         self.transforms = transforms
@@ -96,10 +94,8 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         self.imgs = list(sorted(os.listdir(root_img)))  # OK
         self.masks = None
         self.labels = None
-        if self.root_masks is not None:
-            self.masks = list(sorted(os.listdir(root_masks))) # list of directories with img name
-        else :
-            self.labels = label_reader(json_file_root)
+        self.masks = list(sorted(os.listdir(root_masks))) # list of directories with img name
+
 
     def __len__(self):
         return len(self.imgs)
@@ -113,33 +109,29 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         bboxes, masks = None, None
 
         # load masks and set bboxes
-        if self.masks is not None:
-            mask_path = os.path.join(self.root_masks, self.masks[idx])
-            masks_list = list(sorted(os.listdir(mask_path)))
-            masks, bboxes = [], []
-            for mask in masks_list:
-                img = cv2.imread(mask)
-                masks.append(img)
+        mask_path = os.path.join(self.root_masks, self.masks[idx])
+        masks_list = list(sorted(os.listdir(mask_path)))
+        masks, bboxes = [], []
+        for mask in masks_list:
+            img = cv2.imread(mask)
+            masks.append(img)
 
-                # Build bboxes
-                pos = np.where(img)
-                xmin = np.min(pos[1])
-                xmax = np.max(pos[1])
-                ymin = np.min(pos[0])
-                ymax = np.max(pos[0])
-                bboxes.append([xmin, ymin, xmax, ymax])
-            masks = np.array(masks)
-            bboxes = np.array(bboxes)
+            # Build bboxes
+            pos = np.where(img)
+            xmin = np.min(pos[1])
+            xmax = np.max(pos[1])
+            ymin = np.min(pos[0])
+            ymax = np.max(pos[0])
+            bboxes.append([xmin, ymin, xmax, ymax])
+        masks = np.array(masks)
+        bboxes = np.array(bboxes)
 
-        else :
-
-            bboxes = np.array(self.labels[self.imgs[idx]])  # retrieve in dictionnary associated np.array
 
         # Apply transforms #TODO all in once, clean up ugly code
         target = {}
         if self.custom_transforms is not None:  # include bboxes transforms
             img, res = self.custom_transforms(img, {'boxes': bboxes, 'masks': masks})  # img still in cv2 convention
-            if self.masks is not None: target["masks"] = torch.as_tensor(res['masks'], dtype=torch.uint8)
+            target["masks"] = torch.as_tensor(res['masks'], dtype=torch.uint8)
             bboxes = res['boxes']
         if self.transforms is not None:  # img transforms only
             img = self.transforms(img)  # img toTensor
@@ -154,7 +146,7 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
                   "masks": target['masks'], "image_id": torch.tensor([idx]), "flower_labels": labels, 'iscrowd': iscrowd, 'area': area}
 
 
-        return {'x': img, 'y': target, 'x_name': self.imgs[idx], 'y_name': self.imgs[idx]}
+        return img, target
 
 
 class myModel(torch.nn.Module):

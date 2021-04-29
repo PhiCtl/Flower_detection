@@ -11,9 +11,10 @@ MEAN_Imagenet = [0.485, 0.456, 0.406]
 STD_Imagenet = [0.229, 0.224, 0.225]
 
 
-def label_reader(json_file, type='flower'):
+def label_reader(json_file, type='Flower'):
   """ Read a label file for an image in JSON format:
   Args: valid file path name
+   type (str) flower for masks, and Flower for bbox
   Return: dictionnary of np.array dim:(Nx4) of bounding boxes coordinates [xmin, ymin, xmax, ymax]
   """
   data = pd.read_json(json_file)
@@ -24,10 +25,11 @@ def label_reader(json_file, type='flower'):
 
     pix = []
     for l in d['Label']['objects']:
-        if l['value'] == type:
-            if 'bbox' in l:
+        if 'bbox' in l:
+            if l['title'] == type:
                 b = l['bbox']
                 pix.append([b['left'],b['top'], b['left']+b['width'], b['top']+b['height']])
+        # if masks
     
     if pix:
         bboxes[name] = np.array(pix) # of size (N,4), with opencv image convention
@@ -46,7 +48,7 @@ def draw_bboxes(image, bboxes):
     cv2.destroyAllWindows()
     #cv2_imshow(img)
 
-def get_img_transformed(): #TODO modify min and max sizes
+def get_img_transformed(train=False): #TODO modify min and max sizes
   """
   Apply mandatory transforms on the image
 
@@ -135,28 +137,38 @@ def IoU(bbox_1, bbox_2):
   return 0
 
 def write(dataset, prediction=None, gt=True):
-  os.chdir('/content/drive/MyDrive/GBH/results')
+    """
+    Writes prediction or groundtruth bboxes to files
+    :param dataset: (torch.Dataset)
+    :param prediction: (dic) output of model
+    :param gt: (bool) if we want to write groundtruth to files
+   """
+    os.chdir('/content/drive/MyDrive/GBH/results')
 
-  if gt:
-    os.chdir('groundtruths')
-    # <class_name> <left> <top> <right> <bottom>
-    for (_, target), i in zip(dataset, range(len(dataset))):
-      name = dataset.imgs[i]
-      file_name = name + '.txt'
-      f = open(file_name,'w+') # open file in w mode
-      for label, bbox in zip(target['labels'], target['boxes']):
-        f.write("{} {} {} {} {}\r\n".format(label, bbox[0], bbox[1], bbox[2], bbox[3]))
-      f.close()
+    if gt:
+        os.chdir('groundtruths')
+        # <class_name> <left> <top> <right> <bottom>
+        for (_, target), i in zip(dataset, range(len(dataset))):
+            name = dataset.imgs[i]
+            file_name = name + '.txt'
+            f = open(file_name,'w+') # open file in w mode
+            for label, bbox in zip(target['labels'], target['boxes']):
+                f.write("{} {} {} {} {}\r\n".format(label, bbox[0], bbox[1], bbox[2], bbox[3]))
+            f.close()
 
-  if prediction is not None :
-    os.chdir('detections')
-    # <class_name> <confidence> <left> <top> <right> <bottom>
-    for pred, (_, target), i in zip(prediction, dataset, range(len(dataset))):
-      name = dataset.imgs[i]
-      file_name = name + '.txt'
-      f = open(file_name, 'w+') 
-      for label, score, bbox in zip(pred['labels'], pred['scores'], pred['boxes']):
-        f.write("{} {} {} {} {} {}\r\n".format(label, score, bbox[0], bbox[1], bbox[2], bbox[3]))
-      f.close()
+    if prediction is not None :
+        os.chdir('detections')
+        # <class_name> <confidence> <left> <top> <right> <bottom>
+        for pred, (_, target), i in zip(prediction, dataset, range(len(dataset))):
+            name = dataset.imgs[i]
+            file_name = name + '.txt'
+            f = open(file_name, 'w+')
+            for label, score, bbox in zip(pred['labels'], pred['scores'], pred['boxes']):
+                f.write("{} {} {} {} {} {}\r\n".format(label, score, bbox[0], bbox[1], bbox[2], bbox[3]))
+            f.close()
 
-  os.chdir('/content')
+    os.chdir('/content')
+
+
+
+
