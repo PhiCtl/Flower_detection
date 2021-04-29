@@ -20,7 +20,7 @@ class RandomRotate(object):
     def __call__(self, image, target):
         # Apply rotation
         img, targ = rotate(image, target, self.angle)
-        #draw_bboxes(img, targ['boxes'])
+        draw_bboxes(img, targ['boxes'])
         return img, targ
 
 class FlowerDetectionDataset(torch.utils.data.Dataset):
