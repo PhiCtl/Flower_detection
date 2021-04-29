@@ -60,6 +60,8 @@ def get_img_transformed(train=False): #TODO modify min and max sizes
   transforms.append(T.ToTensor())
   # image scaling and normalization
   transforms.append(T.Normalize(mean=MEAN_Imagenet, std=STD_Imagenet))
+  if train:
+      transforms.append(T.ColorJitter(brightness=0.3, contrast=0.1, saturation=0.1,hue=0.1))
   return T.Compose(transforms)
 
 
