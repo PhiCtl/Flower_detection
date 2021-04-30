@@ -51,8 +51,8 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         # load bounding boxes
         bboxes = np.array(self.flower_labels[self.imgs[idx]])
         nb_flowers = len(bboxes)
-        #if self.imgs[idx] in self.hidden_labels:
-         #   bboxes = np.vstack((bboxes, np.array(self.hidden_labels[self.imgs[idx]])))
+        if self.imgs[idx] in self.hidden_labels:
+           bboxes = np.vstack((bboxes, np.array(self.hidden_labels[self.imgs[idx]])))
         #if self.imgs[idx] in self.core_labels:
             #bboxes = np.vstack((bboxes, np.array(self.core_labels[self.imgs[idx]])))
 
