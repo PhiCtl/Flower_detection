@@ -122,9 +122,10 @@ def rotate(image, target, angle):
     # scale and clip bounding box
     new_bbox = np.divide(new_bbox, np.array([scale_x, scale_y, scale_x, scale_y])).astype(int)  # rescale
     new_bbox[:, 0] = np.maximum(new_bbox[:, 0], 0)
-    new_bbox[:, 1] = np.maximum(new_bbox[:, 1], 0)
+    tp = np.maximum(new_bbox[:, 3], 0)
     new_bbox[:, 2] = np.minimum(new_bbox[:, 2], w)
-    new_bbox[:, 3] = np.minimum(new_bbox[:, 3], h)
+    new_bbox[:, 3] = np.minimum(new_bbox[:, 1], h)
+    new_bbox[:,1] = tp
 
     new_target = {'boxes': new_bbox}
 
