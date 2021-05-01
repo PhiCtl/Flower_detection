@@ -97,7 +97,7 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         self.imgs.remove('masks')
         self.imgs.remove('.ipynb_checkpoints')
         self.masks = list(sorted(os.listdir(root_masks))) # list of folders with img name
-
+        self.imgs.remove('.ipynb_checkpoints')
 
     def __len__(self):
         return len(self.imgs)
