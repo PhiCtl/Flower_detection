@@ -115,7 +115,7 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         masks, bboxes = [], []
         for mask in masks_list:
             path = os.path.join(mask_path, mask)
-            mask_img = cv2.imread(path,0)
+            mask_img = cv2.imread(path,0)/255
 
             # Build bboxes
             pos = np.where(mask_img)
@@ -124,8 +124,6 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
             ymin = np.min(pos[0])
             ymax = np.max(pos[0])
             bboxes.append([xmin, ymin, xmax, ymax])
-            if (mask_img.sum() < 2500):
-                mask_img = np.zeros(mask_img.shape)
             masks.append(mask_img)
         masks = np.array(masks)
         bboxes = np.array(bboxes)
