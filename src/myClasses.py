@@ -138,7 +138,7 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         # there is only one class (either background either flower)
         bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
         labels = torch.ones((len(bboxes),), dtype=torch.int64)
-        area = torch.abs(bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3])
+        area = torch.abs(bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 3] - bboxes[:, 1])
         iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
 
         # Prepare sample
