@@ -114,6 +114,8 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         for mask in masks_list:
             path = os.path.join(mask_path, mask)
             mask_img = cv2.imread(path,0)
+            if (mask_img.sum() < 2500):
+                continue
             masks.append(mask_img)
 
             # Build bboxes
