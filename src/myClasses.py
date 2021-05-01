@@ -89,12 +89,10 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         self.transforms = transforms
         self.custom_transforms = custom_transforms
 
-        # load all image files, sorting them to
+        # load all image files names and masks folder names, sorting them to
         # ensure that they are aligned
         self.imgs = list(sorted(os.listdir(root_img)))  # OK
-        self.masks = None
-        self.labels = None
-        self.masks = list(sorted(os.listdir(root_masks))) # list of directories with img name
+        self.masks = list(sorted(os.listdir(root_masks))) # list of folders with img name
 
 
     def __len__(self):
@@ -106,14 +104,14 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         img_path = os.path.join(self.root_img, self.imgs[idx])
         img = cv2.imread(img_path)  # read in [H,W,3] BGR format
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # turn to RGB [H,W,3]
-        bboxes, masks = None, None
 
         # load masks and set bboxes
-        mask_path = os.path.join(self.root_masks, self.masks[idx])
-        masks_list = list(sorted(os.listdir(mask_path)))
+        mask_path = os.path.join(self.root_masks, self.masks[idx]) # image corresponding mask folder
+        masks_list = list(sorted(os.listdir(mask_path))) # list all masks
         masks, bboxes = [], []
         for mask in masks_list:
-            img = cv2.imread(mask)
+            path = os.path.join(mask_path, mask)
+            img = cv2.imread(path,0)
             masks.append(img)
 
             # Build bboxes
@@ -130,8 +128,7 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         # Apply transforms #TODO all in once, clean up ugly code
         target = {}
         if self.custom_transforms is not None:  # include bboxes transforms
-            img, res = self.custom_transforms(img, {'boxes': bboxes, 'masks': masks})  # img still in cv2 convention
-            target["masks"] = torch.as_tensor(res['masks'], dtype=torch.uint8)
+            img, res = self.custom_transforms(img, {'boxes': bboxes})  # img still in cv2 convention
             bboxes = res['boxes']
         if self.transforms is not None:  # img transforms only
             img = self.transforms(img)  # img toTensor
@@ -143,7 +140,7 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
 
         # Prepare sample
         target = {"boxes": torch.as_tensor(bboxes, dtype=torch.float32),\
-                  "masks": target['masks'], "image_id": torch.tensor([idx]), "flower_labels": labels, 'iscrowd': iscrowd, 'area': area}
+                  "masks": torch.as_tensor(masks, dtype=torch.uint8), "image_id": torch.tensor([idx]), "flower_labels": labels, 'iscrowd': iscrowd, 'area': area}
 
 
         return img, target
