@@ -25,7 +25,7 @@ class RandomRotate(object):
 
 class FlowerDetectionDataset(torch.utils.data.Dataset):
 
-    def __init__(self, root_img, json_file_root=None, transforms=None, custom_transforms=None):
+    def __init__(self, root_img, json_file_root, transforms=None, custom_transforms=None):
         self.root_img = root_img
         self.transforms = transforms
         self.custom_transforms = custom_transforms
@@ -33,6 +33,8 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         # load all image files, sorting them to
         # ensure that they are aligned
         self.imgs = list(sorted(os.listdir(root_img)))  # OK
+        self.imgs.remove('masks')
+        self.imgs.remove('.ipynb_checkpoints')
         self.flower_labels = label_reader(json_file_root)
         self.hidden_labels = label_reader(json_file_root, type='hidden')
         self.core_labels = label_reader(json_file_root, type='core')
@@ -82,7 +84,7 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
 
 class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
 
-    def __init__(self, root_img, root_masks=None, transforms=None, custom_transforms=None):
+    def __init__(self, root_img, root_masks, transforms=None, custom_transforms=None):
         self.root_img = root_img
 
         self.root_masks = root_masks
@@ -114,7 +116,6 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         for mask in masks_list:
             path = os.path.join(mask_path, mask)
             mask_img = cv2.imread(path,0)
-            masks.append(mask_img)
 
             # Build bboxes
             pos = np.where(mask_img)
@@ -123,6 +124,9 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
             ymin = np.min(pos[0])
             ymax = np.max(pos[0])
             bboxes.append([xmin, ymin, xmax, ymax])
+            if (mask_img.sum() < 2500):
+                mask_img = np.zeros(mask_img.shape)
+            masks.append(mask_img)
         masks = np.array(masks)
         bboxes = np.array(bboxes)
 
