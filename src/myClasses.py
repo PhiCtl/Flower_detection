@@ -113,11 +113,11 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         masks, bboxes = [], []
         for mask in masks_list:
             path = os.path.join(mask_path, mask)
-            img = cv2.imread(path,0)
-            masks.append(img)
+            mask_img = cv2.imread(path,0)
+            masks.append(mask_img)
 
             # Build bboxes
-            pos = np.where(img)
+            pos = np.where(mask_img)
             xmin = np.min(pos[1])
             xmax = np.max(pos[1])
             ymin = np.min(pos[0])
