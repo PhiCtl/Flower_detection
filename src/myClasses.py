@@ -92,6 +92,8 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         # load all image files names and masks folder names, sorting them to
         # ensure that they are aligned
         self.imgs = list(sorted(os.listdir(root_img)))  # OK
+        self.imgs.remove('masks')
+        self.imgs.remove('.ipynb_checkpoints')
         self.masks = list(sorted(os.listdir(root_masks))) # list of folders with img name
 
 
