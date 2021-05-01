@@ -136,12 +136,13 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
             img = self.transforms(img)  # img toTensor
 
         # there is only one class (either background either flower)
+        bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
         labels = torch.ones((len(bboxes),), dtype=torch.int64)
         area = torch.abs(bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3])
         iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
 
         # Prepare sample
-        target = {"boxes": torch.as_tensor(bboxes, dtype=torch.float32),\
+        target = {"boxes": bboxes,\
                   "masks": torch.as_tensor(masks, dtype=torch.uint8), "image_id": torch.tensor([idx]), "labels": labels, 'iscrowd': iscrowd, 'area': area}
 
 
