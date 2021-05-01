@@ -143,7 +143,7 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
 
         # Prepare sample
         target = {"boxes": torch.as_tensor(bboxes, dtype=torch.float32),\
-                  "masks": torch.as_tensor(masks, dtype=torch.uint8), "image_id": torch.tensor([idx]), "flower_labels": labels, 'iscrowd': iscrowd, 'area': area}
+                  "masks": torch.as_tensor(masks, dtype=torch.uint8), "image_id": torch.tensor([idx]), "labels": labels, 'iscrowd': iscrowd, 'area': area}
 
 
         return img, target
