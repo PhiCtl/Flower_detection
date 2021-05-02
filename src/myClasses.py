@@ -33,8 +33,7 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         # load all image files, sorting them to
         # ensure that they are aligned
         self.imgs = list(sorted(os.listdir(root_img)))  # OK
-        self.imgs.remove('masks')
-        self.imgs.remove('.ipynb_checkpoints')
+        if '.ipynb_checkpoints' in self.imgs: self.imgs.remove('.ipynb_checkpoints')
         self.flower_labels = label_reader(json_file_root)
         self.hidden_labels = label_reader(json_file_root, type='hidden')
         self.core_labels = label_reader(json_file_root, type='core')
@@ -94,10 +93,9 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         # load all image files names and masks folder names, sorting them to
         # ensure that they are aligned
         self.imgs = list(sorted(os.listdir(root_img)))  # OK
-        self.imgs.remove('masks')
-        self.imgs.remove('.ipynb_checkpoints')
+        if '.ipynb_checkpoints' in self.imgs: self.imgs.remove('.ipynb_checkpoints')
         self.masks = list(sorted(os.listdir(root_masks))) # list of folders with img name
-        self.masks.remove('.ipynb_checkpoints')
+        if '.ipynb_checkpoints' in self.masks: self.masks.remove('.ipynb_checkpoints')
 
     def __len__(self):
         return len(self.imgs)
