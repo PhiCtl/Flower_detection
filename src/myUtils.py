@@ -63,7 +63,7 @@ def get_img_transformed(train=False): #TODO modify min and max sizes
   if train:
       #transforms.append(T.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1,hue=0.1))
       #transforms.append(T.RandomErasing()) # to randomly erase some pixels (artifical occlusion)
-      transforms.append(T.GaussianBlur(kernel_size=5, sigma=(0.01,2.0)) # because high resolution pictures
+      transforms.append(T.GaussianBlur(kernel_size=5, sigma=(0.01,2.0))) # because high resolution pictures
   return T.Compose(transforms)
 
 
