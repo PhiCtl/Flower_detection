@@ -35,8 +35,8 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         self.imgs = list(sorted(os.listdir(root_img)))  # OK
         if '.ipynb_checkpoints' in self.imgs: self.imgs.remove('.ipynb_checkpoints')
         self.flower_labels = label_reader(json_file_root)
-        self.hidden_labels = label_reader(json_file_root, type='hidden')
-        self.core_labels = label_reader(json_file_root, type='core')
+        self.hidden_labels = label_reader(json_file_root, type='Hidden')
+        self.core_labels = label_reader(json_file_root, type='Core')
 
 
     def __len__(self):
