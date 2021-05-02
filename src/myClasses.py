@@ -54,8 +54,8 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         nb_flowers = len(bboxes)
         if self.imgs[idx] in self.hidden_labels:
            bboxes = np.vstack((bboxes, np.array(self.hidden_labels[self.imgs[idx]])))
-        #if self.imgs[idx] in self.core_labels:
-            #bboxes = np.vstack((bboxes, np.array(self.core_labels[self.imgs[idx]])))
+        if self.imgs[idx] in self.core_labels:
+            bboxes = np.vstack((bboxes, np.array(self.core_labels[self.imgs[idx]])))
 
         # Apply transforms #TODO all in once, clean up ugly code
         # Still img: np.array and bboxes:np.array
@@ -65,7 +65,7 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
 
         # there is only one class (either background either flower)
         labels = torch.ones((len(bboxes),), dtype=torch.int64)
-        #labels[nb_flowers:] *= 2 # assign class 2 to flower cores
+        labels[nb_flowers:] *= 2 # assign class 2 to flower cores
         bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
         area = torch.abs(bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3])
         iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
