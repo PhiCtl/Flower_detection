@@ -29,12 +29,13 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         self.root_img = root_img
         self.transforms = transforms
         self.custom_transforms = custom_transforms
+        self.include_core = core
 
         # load all image files, sorting them to
         # ensure that they are aligned
         self.imgs = list(sorted(os.listdir(root_img)))  # OK
         if '.ipynb_checkpoints' in self.imgs: self.imgs.remove('.ipynb_checkpoints')
-        if core:
+        if self.include_core :
             self.core_labels = label_reader(json_file_root, type='Core')
         else:
             self.flower_labels = label_reader(json_file_root)
@@ -52,7 +53,7 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # turn to RGB [H,W,3]
 
         # load bounding boxes
-        if core and self.imgs[idx] in self.core_labels:
+        if self.include_core and self.imgs[idx] in self.core_labels:
             bboxes = np.array(self.core_labels[self.imgs[idx]])
         else:
             bboxes = np.array(self.flower_labels[self.imgs[idx]])
