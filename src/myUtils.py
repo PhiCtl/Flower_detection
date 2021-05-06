@@ -76,7 +76,7 @@ def get_img_transformed(train=False): #TODO modify min and max sizes
 
 def collate_fn(batch):
   """Credits to https://github.com/pytorch/vision/blob/master/references/detection/utils.py"""
-    return tuple(zip(*batch))
+  return tuple(zip(*batch))
 
 
 def draw_corners(image, corners):
