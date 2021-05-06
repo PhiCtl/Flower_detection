@@ -37,9 +37,9 @@ def label_reader(json_file, type='Flower'):
   return bboxes
 
 
-def draw_bboxes(target, name, thresh = 0.8):
+def draw_bboxes(target, name, thresh = 0.8, img_dir = 'drive/MyDrive/GBH/data_test/images/'):
   # How it is used : draw_bboxes(prediction[0], name=dataset_test.imgs[target['image_id']],thresh=0.6)
-    img_path = 'drive/MyDrive/GBH/data_test/images/' + name
+    img_path = img_dir + name
     image = cv2.imread(img_path)
     for [xm,ym,xM,yM], label, score in zip(target["boxes"], target["labels"], target["scores"]):
       color = ()
