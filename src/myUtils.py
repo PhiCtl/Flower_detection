@@ -74,16 +74,9 @@ def get_img_transformed(train=False): #TODO modify min and max sizes
       transforms.append(T.GaussianBlur(kernel_size=5, sigma=(0.01,2.0))) # because high resolution pictures
   return T.Compose(transforms)
 
-
-def collate_double(batch):
-    """
-    collate function for the ObjectDetectionDataSet.
-    Only used by the dataloader.
-    from : https://johschmidt42.medium.com/train-your-own-object-detector-with-faster-rcnn-pytorch-8d3c759cfc70
-    """
-    x = [sample['image'] for sample in batch]
-    y = [sample['target'] for sample in batch] #list of tensors
-    return x, y
+def collate_fn(batch):
+  """Credits to https://github.com/pytorch/vision/blob/master/references/detection/utils.py"""
+    return tuple(zip(*batch))
 
 
 def draw_corners(image, corners):
