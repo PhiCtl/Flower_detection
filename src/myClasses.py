@@ -25,7 +25,7 @@ class RandomRotate(object):
 
 class FlowerDetectionDataset(torch.utils.data.Dataset):
 
-    def __init__(self, root_img, json_file_root, transforms=None, custom_transforms=None):
+    def __init__(self, root_img, json_file_root, core=False, transforms=None, custom_transforms=None):
         self.root_img = root_img
         self.transforms = transforms
         self.custom_transforms = custom_transforms
@@ -34,9 +34,11 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         # ensure that they are aligned
         self.imgs = list(sorted(os.listdir(root_img)))  # OK
         if '.ipynb_checkpoints' in self.imgs: self.imgs.remove('.ipynb_checkpoints')
-        self.flower_labels = label_reader(json_file_root)
-        self.hidden_labels = label_reader(json_file_root, type='Hidden')
-        self.core_labels = label_reader(json_file_root, type='Core')
+        if core:
+            self.core_labels = label_reader(json_file_root, type='Core')
+        else:
+            self.flower_labels = label_reader(json_file_root)
+        
 
 
     def __len__(self):
@@ -50,12 +52,10 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # turn to RGB [H,W,3]
 
         # load bounding boxes
-        bboxes = np.array(self.flower_labels[self.imgs[idx]])
-        nb_flowers = len(bboxes)
-        if self.imgs[idx] in self.hidden_labels:
-           bboxes = np.vstack((bboxes, np.array(self.hidden_labels[self.imgs[idx]])))
-        if self.imgs[idx] in self.core_labels:
-            bboxes = np.vstack((bboxes, np.array(self.core_labels[self.imgs[idx]])))
+        if core and self.imgs[idx] in self.core_labels:
+            bboxes = np.array(self.core_labels[self.imgs[idx]])
+        else:
+            bboxes = np.array(self.flower_labels[self.imgs[idx]])
 
         # Apply transforms #TODO all in once, clean up ugly code
         # Still img: np.array and bboxes:np.array
@@ -63,9 +63,8 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
             img, res = self.custom_transforms(img, {'boxes': bboxes})  # img still in cv2 convention
             bboxes = res['boxes']
 
-        # there is only one class (either background either flower)
+        # there is only one class (either background either flower/core)
         labels = torch.ones((len(bboxes),), dtype=torch.int64)
-        labels[nb_flowers:] *= 2 # assign class 2 to flower cores
         bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
         area = torch.abs(bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3])
         iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
