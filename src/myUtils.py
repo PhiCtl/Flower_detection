@@ -37,16 +37,20 @@ def label_reader(json_file, type='Flower'):
   return bboxes
 
 
-def draw_bboxes(image, bboxes):
-    img = image.copy()
-    for [xm,ym,xM,yM] in bboxes:
-        img = cv2.rectangle(img, (xm,ym), (xM,yM), (255,0,0), 2)
-    rescale = (int(img.shape[1]/4), int(img.shape[0]/4))
-    img = cv2.resize(img, rescale)
-    cv2.imshow("Image with bounding box", img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    #cv2_imshow(img)
+def draw_bboxes(target, name, thresh = 0.8):
+  # How it is used : draw_bboxes(prediction[0], name=dataset_test.imgs[target['image_id']],thresh=0.6)
+    img_path = 'drive/MyDrive/GBH/data_test/images/' + name
+    image = cv2.imread(img_path)
+    for [xm,ym,xM,yM], label, score in zip(target["boxes"], target["labels"], target["scores"]):
+      color = ()
+      if label == 1: c = (255,0,0)
+      if label == 2: c = (0,255,0)
+      if score > thresh :
+        image = cv2.rectangle(image, (xm,ym), (xM,yM), c, 2)
+    
+    rescale = (int(image.shape[1]/4), int(image.shape[0]/4))
+    image = cv2.resize(image, rescale)
+    cv2.imshow("Boundi boxes", image)
 
 def get_img_transformed(train=False): #TODO modify min and max sizes
   """
@@ -140,14 +144,15 @@ def IoU(bbox_1, bbox_2):
    
   return 0
 
-def write(dataset, prediction=None, gt=True):
+def write(dataset, prediction=None, gt=True, initial_dir = '/content/drive/MyDrive/GBH/results' ):
     """
     Writes prediction or groundtruth bboxes to files
     :param dataset: (torch.Dataset)
     :param prediction: (dic) output of model
     :param gt: (bool) if we want to write groundtruth to files
+    :param initial_dir : should contain the two following subfolders: groundtruths and detections
    """
-    os.chdir('/content/drive/MyDrive/GBH/results')
+    os.chdir(initial_dir)
 
     if gt:
         os.chdir('groundtruths')
@@ -172,6 +177,22 @@ def write(dataset, prediction=None, gt=True):
             f.close()
 
     os.chdir('/content')
+    
+    
+def eval_custom(dataset, model, device=device):
+  "Should NOT be used for mask RCNN -> because too heavy in memory"
+
+  predictions = []
+  model.eval()
+
+  with torch.no_grad():
+
+    for img, _ in dataset:
+      preds = model([img.to(device)])
+      for p in preds:
+        predictions.append(p)
+
+  return predictions
 
 
 
