@@ -183,7 +183,7 @@ def write(dataset, prediction=None, gt=True, initial_dir = '/content/drive/MyDri
     os.chdir('/content')
     
     
-def eval_custom(dataset, model, device=device):
+def eval_custom(dataset, model, device):
   "Should NOT be used for mask RCNN -> because too heavy in memory"
 
   predictions = []
