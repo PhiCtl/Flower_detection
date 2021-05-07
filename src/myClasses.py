@@ -65,8 +65,8 @@ class Rescale(object):
           target = tgt.copy()
           # resizing bounding boxes
           boxes = target['boxes']
-          scale_x = new_w / w
-          scale_y = new_h / h
+          scale_x = w / new_w
+          scale_y = h / new_h
 
           # rescale and clip
           new_bbox = np.divide(boxes, np.array([scale_x, scale_y, scale_x, scale_y])).astype(int)  # rescale
