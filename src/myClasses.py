@@ -70,11 +70,6 @@ class Rescale(object):
 
           # rescale and clip
           new_bbox = np.divide(boxes, np.array([scale_x, scale_y, scale_x, scale_y])).astype(int)  # rescale
-          new_bbox[:, 0] = np.maximum(new_bbox[:, 0], 0)
-          tp = np.maximum(new_bbox[:, 3], 0)
-          new_bbox[:, 2] = np.minimum(new_bbox[:, 2], w)
-          new_bbox[:, 3] = np.minimum(new_bbox[:, 1], h)
-          new_bbox[:,1] = tp
           target['boxes'] = new_bbox
 
           return image, target
