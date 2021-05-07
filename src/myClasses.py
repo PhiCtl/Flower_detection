@@ -22,6 +22,64 @@ class RandomRotate(object):
         img, targ = rotate(image, target, self.angle)
         #draw_bboxes(img, targ['boxes'])
         return img, targ
+    
+    
+    
+# For orientation prediction
+
+class Rescale(object):
+    """Rescale the image in a sample to a given size.
+
+    Args:
+        output_size (tuple or int): Desired output size. If tuple, output is
+            matched to output_size. If int, smaller of image edges is matched
+            to output_size keeping aspect ratio the same.
+    """
+
+    def __init__(self, output_size):
+      """
+      Args: output size should be of the following form 
+        - int: for square pictures
+        - tuple = (new height, new width): otherwise
+      """
+      assert isinstance(output_size, (int, tuple))
+      self.output_size = output_size
+
+    def __call__(self, img, tgt=None):
+        image = img.copy()
+
+        # reshape image
+        h, w = image.shape[:2]
+        if isinstance(self.output_size, int):
+            if h > w:
+                new_h, new_w = self.output_size * h / w, self.output_size
+            else:
+                new_h, new_w = self.output_size, self.output_size * w / h
+        else:
+            new_h, new_w = self.output_size
+
+        new_h, new_w = int(new_h), int(new_w)
+        image = cv2.resize(image, (new_h, new_w))
+
+        if tgt is not None:
+          target = tgt.copy()
+          # resizing bounding boxes
+          boxes = target['boxes']
+          scale_x = new_w / w
+          scale_y = new_h / h
+
+          # rescale and clip
+          new_bbox = np.divide(boxes, np.array([scale_x, scale_y, scale_x, scale_y])).astype(int)  # rescale
+          new_bbox[:, 0] = np.maximum(new_bbox[:, 0], 0)
+          tp = np.maximum(new_bbox[:, 3], 0)
+          new_bbox[:, 2] = np.minimum(new_bbox[:, 2], w)
+          new_bbox[:, 3] = np.minimum(new_bbox[:, 1], h)
+          new_bbox[:,1] = tp
+          target['boxes'] = new_bbox
+
+          return image, target
+        else:
+          return image
 
 class FlowerDetectionDataset(torch.utils.data.Dataset):
 
