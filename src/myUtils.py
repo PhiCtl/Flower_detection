@@ -213,7 +213,7 @@ def draw_bboxes(target, name, scale = 1, thresh = 0.8, img_dir = 'drive/MyDrive/
     
     rescale = (int(image.shape[1]/scale), int(image.shape[0]/scale))
     image = cv2.resize(image, rescale)
-    cv2_imshow("Bounding boxes", image) ## This line works only for Colab usage
+    cv2_imshow(image) ## This line works only for Colab usage
 
 
 def draw_corners(image, corners):
