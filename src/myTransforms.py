@@ -1,6 +1,17 @@
-import cv2
 import numpy as np
+import torchvision.transforms as T
+import torchvision, torch, cv2
 
+########################################################################################################################
+# SOME CONSTANTS
+########################################################################################################################
+
+MEAN_Imagenet = [0.485, 0.456, 0.406]
+STD_Imagenet = [0.229, 0.224, 0.225]
+
+########################################################################################################################
+# Transform functions
+########################################################################################################################
 
 # from https://blog.paperspace.com/data-augmentation-for-object-detection-rotation-and-shearing/
 def get_corners(bboxes):
@@ -138,3 +149,25 @@ def rotate(image, target, angle):
         new_target['masks'] = masks
 
     return img, new_target
+
+########################################################################################################################
+# Torch useful transforms
+########################################################################################################################
+
+def get_img_transformed(train=False):
+  """
+  Apply mandatory transforms on the image
+
+  Returns:
+            - Composition of transforms
+  """
+  transforms = []
+  # converts the image into a PyTorch Tensor
+  transforms.append(T.ToTensor())
+  # image scaling and normalization
+  transforms.append(T.Normalize(mean=MEAN_Imagenet, std=STD_Imagenet))
+  if train:
+      transforms.append(T.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1,hue=0.1))
+      #transforms.append(T.RandomErasing()) # to randomly erase some pixels (artifical occlusion)
+      #transforms.append(T.GaussianBlur(kernel_size=5, sigma=(0.01,2.0))) # because high resolution pictures
+  return T.Compose(transforms)
