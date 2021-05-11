@@ -1,6 +1,5 @@
 import torch
 import torchvision
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from myUtils import*
 from myTransforms import *
 import cv2
@@ -23,9 +22,7 @@ class RandomRotate(object):
         #draw_bboxes(img, targ['boxes'])
         return img, targ
     
-    
-    
-# For orientation prediction
+
 
 class Rescale(object):
     """Rescale the image in a sample to a given size.
@@ -201,16 +198,3 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
 
         return img, target
 
-
-class myModel(torch.nn.Module):
-
-    def __init__(self, model_type='fasterrcnn_resnet50_fpn', num_classes=2):
-        super().__init__()
-
-        self.num_classes = num_classes
-        self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
-        in_features = self.model.roi_heads.box_predictor.cls_score.in_features
-        self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
-
-    def forward(self, x):
-        return self.model(x)
