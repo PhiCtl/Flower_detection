@@ -31,8 +31,8 @@ def eval_custom_YOLO(dataset, model):
         for i in range(len(dataset)):
             path = '/content/drive/MyDrive/GBH/data_test/images/' + dataset.imgs[i]
             img = cv2.imread(path)
-            img = cv2.resize(img, (640, 640))
-            results = model(img, size=640)
+            #img = cv2.resize(img, (640, 640))
+            results = model(img)
             target = {}
             target['boxes'] = results.xyxy[0][:, :4]
             target['scores'] = results.xyxy[0][:, 4].flatten()
