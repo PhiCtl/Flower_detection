@@ -87,8 +87,8 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         if '.ipynb_checkpoints' in self.imgs: self.imgs.remove('.ipynb_checkpoints')
         if self.include_core :
             self.core_labels = label_reader(json_file_root, type='Core')
-        else:
-            self.flower_labels = label_reader(json_file_root)
+        
+        self.flower_labels = label_reader(json_file_root)
         
 
 
@@ -103,11 +103,11 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # turn to RGB [H,W,3]
 
         # load bounding boxes
+        bboxes = np.array(self.flower_labels[self.imgs[idx]])
+        labels = np.ones((len(bboxes)))
         if self.include_core and self.imgs[idx] in self.core_labels:
-            bboxes = np.array(self.core_labels[self.imgs[idx]])
-        else:
-            bboxes = np.array(self.flower_labels[self.imgs[idx]])
-
+            bboxes = np.vstack((bboxes,np.array(self.core_labels[self.imgs[idx]])))
+            labels = np.hstack((labels, np.zeros(len(bboxes)-len(labels)) ))
         # Apply transforms #TODO all in once, clean up ugly code
         # Still img: np.array and bboxes:np.array
         if self.custom_transforms is not None:  # include bboxes transforms
@@ -115,7 +115,7 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
             bboxes = res['boxes']
 
         # there is only one class (either background either flower/core)
-        labels = torch.ones((len(bboxes),), dtype=torch.int64)
+        labels = torch.as_tensor(labels, dtype=torch.int64)
         bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
         area = torch.abs(bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3])
         iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
