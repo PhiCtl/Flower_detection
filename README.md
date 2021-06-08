@@ -16,3 +16,6 @@ Two Colab notebooks, namely ```Object_detection_FRCNN.ipynb``` and ```Object_det
   - https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
 - Ultralytics repository : https://github.com/ultralytics/yolov5
 - LabelBox: https://app.labelbox.com/projects
+
+## Data and trained models
+Make me a request !
