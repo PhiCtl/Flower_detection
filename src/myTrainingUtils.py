@@ -3,7 +3,9 @@ import torch, torchvision, cv2
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
-
+##################################################################################################################
+# MODEL EVALUATION
+##################################################################################################################
 
 def eval_custom(dataset, model, device):
     "Should NOT be used for mask RCNN -> because too heavy in memory"
@@ -21,7 +23,7 @@ def eval_custom(dataset, model, device):
     return predictions
 
 
-def eval_custom_YOLO(dataset, model):
+def eval_custom_YOLO(dataset, model, path = '/content/drive/MyDrive/GBH/data_test/images/'):
     """Custom evaluation for YOLO models only"""
 
     predictions = []
@@ -29,7 +31,7 @@ def eval_custom_YOLO(dataset, model):
 
     with torch.no_grad():
         for i in range(len(dataset)):
-            path = '/content/drive/MyDrive/GBH/data_test/images/' + dataset.imgs[i]
+            path += dataset.imgs[i]
             img = cv2.imread(path)
             #img = cv2.resize(img, (640, 640))
             results = model(img)
@@ -41,6 +43,9 @@ def eval_custom_YOLO(dataset, model):
 
     return predictions
 
+##################################################################################################################
+# GET PRETRAINED MODEL
+##################################################################################################################
 
 def get_object_detection_model(num_classes, mtype='Resnet50_FPN'):
     # load a model pre-trained on COCO
@@ -85,8 +90,9 @@ def get_object_detection_model(num_classes, mtype='Resnet50_FPN'):
                                                            num_classes)
 
     if mtype == 'YOLOv5x':
-        model = torch.hub.load('ultralytics/yolov5', 'custom',
-                               path='/content/drive/MyDrive/GBH/models/yolo_07052021_1710/best.pt')
+        model = torch.hub.load('ultralytics/yolov5', 'yolov5x')
+    else:
+        raise ValueError('Model type not handled')
 
     return model
 

@@ -1,3 +1,10 @@
+"""
+Contains :
+-> Custom transforms classes for object detection: Rescale and Rotate
+-> Data loaders
+"""
+
+
 import torch
 import torchvision
 from myUtils import*
@@ -74,12 +81,15 @@ class Rescale(object):
           return image
 
 class FlowerDetectionDataset(torch.utils.data.Dataset):
+    """
+    Data loader for Object detection
+    """
 
     def __init__(self, root_img, json_file_root, core=False, transforms=None, custom_transforms=None):
         self.root_img = root_img
         self.transforms = transforms
         self.custom_transforms = custom_transforms
-        self.include_core = core
+        self.include_core = core # in case we want to include the flower cores labels
 
         # load all image files, sorting them to
         # ensure that they are aligned
@@ -108,7 +118,8 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         if self.include_core and self.imgs[idx] in self.core_labels:
             bboxes = np.vstack((bboxes,np.array(self.core_labels[self.imgs[idx]])))
             labels = np.hstack((labels, np.zeros(len(bboxes)-len(labels)) ))
-        # Apply transforms #TODO all in once, clean up ugly code
+
+        # Apply transforms
         # Still img: np.array and bboxes:np.array
         if self.custom_transforms is not None:  # include bboxes transforms
             img, res = self.custom_transforms(img, {'boxes': bboxes})  # img still in cv2 convention
@@ -118,7 +129,7 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
         labels = torch.as_tensor(labels, dtype=torch.int64)
         bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
         area = torch.abs(bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 1] - bboxes[:, 3])
-        iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
+        iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd
 
         # Prepare sample
         target = {"boxes": bboxes, "image_id": torch.tensor([idx]),\
@@ -132,6 +143,10 @@ class FlowerDetectionDataset(torch.utils.data.Dataset):
 
 
 class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
+
+    """
+    Data loader for Object detection with mask
+    """
 
     def __init__(self, root_img, root_masks, transforms=None, custom_transforms=None):
         self.root_img = root_img
@@ -177,7 +192,7 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         bboxes = np.array(bboxes)
 
 
-        # Apply transforms #TODO all in once, clean up ugly code
+        # Apply transforms
         target = {}
         if self.custom_transforms is not None:  # include bboxes transforms
             img, res = self.custom_transforms(img, {'boxes': bboxes})  # img still in cv2 convention
@@ -189,7 +204,7 @@ class FlowerMaskDetectionDataset(torch.utils.data.Dataset):
         bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
         labels = torch.ones((len(bboxes),), dtype=torch.int64)
         area = torch.abs((bboxes[:, 2] - bboxes[:, 0])*(bboxes[:, 3] - bboxes[:, 1]))
-        iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd (?!) # TODO what is iscrowd
+        iscrowd = torch.zeros((len(bboxes),), dtype=torch.int64) # all instances are not crowd
 
         # Prepare sample
         target = {"boxes": bboxes,\
